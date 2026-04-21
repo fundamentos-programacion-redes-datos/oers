@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guía de Inicio: Python, Git y GitHub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 240px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 240px;
+            max-height: 240px;
+        }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: #fafaf9; 
+            color: #1c1917;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(8px);
+            border: 1px solid #e7e5e4;
+        }
+        .nav-item.active {
+            background-color: #f5f5f4;
+            border-left: 4px solid #10b981;
+            font-weight: 600;
+        }
+        .hidden-view {
+            display: none;
+        }
+        .code-block {
+            background-color: #1c1917;
+            color: #d6d3d1;
+            padding: 1.25rem;
+            border-radius: 0.5rem;
+            font-family: 'ui-monospace', 'SFMono-Regular', Menlo, Monaco, Consolas, monospace;
+            position: relative;
+            overflow-x: auto;
+            border: 1px solid #44403c;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: #44403c;
+            color: #fafaf9;
+            border: none;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: all 0.2s;
+        }
+        .copy-btn:hover {
+            background: #57534e;
+        }
+        .step-node {
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .step-node:hover {
+            transform: scale(1.02);
+        }
+        .step-node.active-flow {
+            border-color: #10b981;
+            background-color: #f0fdf4;
+            box-shadow: 0 4px 12px -2px rgba(16, 185, 129, 0.1);
+        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #fafaf9; }
+        ::-webkit-scrollbar-thumb { background: #d6d3d1; border-radius: 10px; }
+    </style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden">
+
+    <!-- Chosen Palette: Stone & Emerald. Una base de neutros cálidos (Stone) para profesionalismo y calma, con acentos en Esmeralda para indicar éxito y progreso. -->
+    <!-- Application Structure Plan: La aplicación utiliza un esquema de tablero con navegación lateral. Se ha diseñado para transformar el documento estático en un recorrido interactivo dividido en 4 secciones clave: Introducción, Instalación, Configuración y Forma de Trabajo. El usuario puede marcar tareas para ver su progreso en tiempo real mediante un gráfico de Chart.js, lo que fomenta la finalización del proceso. -->
+    <!-- Visualization & Content Choices: 
+        1. Gráfico de Progreso -> Goal: Inform/Organize -> Un gráfico de dona que muestra visualmente cuánto falta para terminar la configuración.
+        2. Diagrama de Forma de Trabajo -> Goal: Process -> Se traduce la sección 3 del reporte en un selector dinámico para que el alumno explore los pasos secuencialmente.
+        3. Bloques de Código -> Goal: Inform -> Presentación limpia de comandos para copiar directamente.
+        Confirmación: NO se utiliza SVG ni Mermaid JS. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <header class="bg-white border-b border-stone-200 px-6 py-4 flex justify-between items-center z-20 shrink-0">
+        <div>
+            <h1 class="text-xl font-bold text-stone-900 tracking-tight">Configuración del Entorno</h1>
+            <p class="text-xs text-stone-500 font-medium">Guía: Python, Git y GitHub</p>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="text-right hidden sm:block">
+                <p class="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Estado de Configuración</p>
+                <p class="text-lg font-black text-emerald-600" id="header-progress-text">0%</p>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex flex-1 overflow-hidden">
+        
+        <aside class="w-full md:w-72 bg-white border-r border-stone-200 flex flex-col shrink-0 overflow-y-auto">
+            <div class="p-6">
+                <div class="chart-container mb-2">
+                    <canvas id="progressChart"></canvas>
+                </div>
+                <p class="text-center text-[11px] text-stone-500 italic">Siga los pasos para completar la guía</p>
+            </div>
+            
+            <nav class="flex-1">
+                <ul class="space-y-1">
+                    <li>
+                        <button onclick="app.navigate('intro')" id="nav-intro" class="nav-item active w-full text-left px-6 py-4 text-stone-600 hover:bg-stone-50 transition-all flex items-center gap-3">
+                            <span class="text-lg">📄</span>
+                            <span class="text-sm font-medium">Introducción</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button onclick="app.navigate('tools')" id="nav-tools" class="nav-item w-full text-left px-6 py-4 text-stone-600 hover:bg-stone-50 transition-all flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <span class="text-lg">🛠️</span>
+                                <span class="text-sm font-medium">1. Instalación</span>
+                            </div>
+                            <span id="badge-tools" class="text-[10px] bg-stone-100 text-stone-500 font-bold py-1 px-2 rounded-full">0/3</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button onclick="app.navigate('github')" id="nav-github" class="nav-item w-full text-left px-6 py-4 text-stone-600 hover:bg-stone-50 transition-all flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <span class="text-lg">🌐</span>
+                                <span class="text-sm font-medium">2. GitHub</span>
+                            </div>
+                            <span id="badge-github" class="text-[10px] bg-stone-100 text-stone-500 font-bold py-1 px-2 rounded-full">0/2</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button onclick="app.navigate('workflow')" id="nav-workflow" class="nav-item w-full text-left px-6 py-4 text-stone-600 hover:bg-stone-50 transition-all flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <span class="text-lg">🔄</span>
+                                <span class="text-sm font-medium">3. Forma de Trabajo</span>
+                            </div>
+                            <span id="badge-workflow" class="text-[10px] bg-stone-100 text-stone-500 font-bold py-1 px-2 rounded-full">0/4</span>
+                        </button>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="flex-1 overflow-y-auto bg-stone-50 p-6 md:p-12" id="scroll-container">
+            
+            <section id="view-intro" class="max-w-3xl mx-auto space-y-6">
+                <div class="glass-panel rounded-2xl p-8 shadow-sm">
+                    <h2 class="text-3xl font-extrabold text-stone-900 mb-4">Configuración del Entorno y Flujo de Trabajo</h2>
+                    <p class="text-stone-600 leading-relaxed text-lg">
+                        En esta guía se detallan los pasos necesarios para configurar su entorno de desarrollo, gestionar repositorios con Git y ejecutar scripts de Python correctamente.
+                    </p>
+                    <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-100">
+                            <p class="text-emerald-800 text-sm font-semibold">Objetivo Principal</p>
+                            <p class="text-emerald-700 text-xs mt-1">Establecer una base sólida para el desarrollo de software versionado.</p>
+                        </div>
+                        <div class="p-4 rounded-xl bg-stone-100 border border-stone-200">
+                            <p class="text-stone-800 text-sm font-semibold">Metodología</p>
+                            <p class="text-stone-700 text-xs mt-1">Siga cada paso secuencialmente y marque su avance en el panel lateral.</p>
+                        </div>
+                    </div>
+                    <button onclick="app.navigate('tools')" class="mt-10 w-full md:w-auto bg-stone-900 hover:bg-stone-800 text-white font-bold py-4 px-8 rounded-xl transition-all shadow-lg shadow-stone-200">
+                        Comenzar Instalaciones ➡️
+                    </button>
+                </div>
+            </section>
+
+            <section id="view-tools" class="max-w-3xl mx-auto hidden-view space-y-6">
+                <div class="mb-4">
+                    <h2 class="text-2xl font-bold text-stone-900">1. Instalación de Herramientas (recordatorio)</h2>
+                    <p class="text-stone-500 text-sm">Es fundamental preparar el sistema antes de comenzar la programación.</p>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="glass-panel rounded-xl p-6 flex items-start gap-5" id="card-t1">
+                        <input type="checkbox" id="chk-t1" onchange="app.toggle('t1')" class="mt-1 w-5 h-5 rounded border-stone-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer">
+                        <div>
+                            <h3 class="text-lg font-bold text-stone-800">Python</h3>
+                            <p class="text-stone-600 text-sm mt-1">El lenguaje base de nuestros proyectos.</p>
+                            <div class="mt-4 flex gap-2">
+                                <a href="https://www.python.org/" target="_blank" class="text-xs bg-stone-800 text-white px-3 py-1.5 rounded hover:bg-stone-700 transition-colors">Descargar Python ↗</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel rounded-xl p-6 flex items-start gap-5" id="card-t2">
+                        <input type="checkbox" id="chk-t2" onchange="app.toggle('t2')" class="mt-1 w-5 h-5 rounded border-stone-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer">
+                        <div>
+                            <h3 class="text-lg font-bold text-stone-800">Git</h3>
+                            <p class="text-stone-600 text-sm mt-1">Sistema de control de versiones. Incluirá **Git Bash**, una terminal de utilidad para usuarios de Windows.</p>
+                            <div class="mt-4 flex items-center gap-3">
+                                <a href="https://git-scm.com/" target="_blank" class="text-xs bg-stone-800 text-white px-3 py-1.5 rounded hover:bg-stone-700 transition-colors">Descargar Git ↗</a>
+                                <span class="text-[10px] text-stone-400 font-medium italic">(Recomendado para Windows)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel rounded-xl p-6 flex items-start gap-5" id="card-t3">
+                        <input type="checkbox" id="chk-t3" onchange="app.toggle('t3')" class="mt-1 w-5 h-5 rounded border-stone-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer">
+                        <div class="w-full">
+                            <h3 class="text-lg font-bold text-stone-800">IDE (Entorno de Desarrollo Integrado)</h3>
+                            <p class="text-stone-600 text-sm mt-1">Herramienta donde escribirá su código. Se recomiendan:</p>
+                            <div class="grid grid-cols-2 gap-3 mt-4">
+                                <div class="bg-stone-50 border border-stone-200 p-3 rounded-lg text-center">
+                                    <span class="text-sm font-bold text-stone-700">PyCharm</span>
+                                </div>
+                                <div class="bg-stone-50 border border-stone-200 p-3 rounded-lg text-center">
+                                    <span class="text-sm font-bold text-stone-700">VS Code</span>
+                                </div>
+                            </div>
+                            <p class="text-[10px] text-stone-400 mt-2">Puede usar otro sin problema alguno.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="view-github" class="max-w-3xl mx-auto hidden-view space-y-6">
+                <div class="mb-4">
+                    <h2 class="text-2xl font-bold text-stone-900">2. Configuración de GitHub</h2>
+                    <p class="text-stone-500 text-sm">Plataforma donde se aloja el código versionado de manera remota.</p>
+                </div>
+
+                <div class="glass-panel rounded-xl p-6 mb-4">
+                    <div class="flex items-start gap-5">
+                        <input type="checkbox" id="chk-g1" onchange="app.toggle('g1')" class="mt-1 w-5 h-5 rounded border-stone-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer">
+                        <div>
+                            <h3 class="text-lg font-bold text-stone-800">Crear Cuenta</h3>
+                            <p class="text-stone-600 text-sm mt-1">Regístrese para poder subir y compartir sus repositorios.</p>
+                            <a href="https://github.com/" target="_blank" class="mt-3 inline-block text-xs bg-stone-100 border border-stone-300 text-stone-800 px-4 py-2 rounded-lg font-bold hover:bg-stone-200 transition-all">Ir a github.com ↗</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-panel rounded-xl p-8 border-t-4 border-t-emerald-500">
+                    <div class="flex items-start gap-5">
+                        <input type="checkbox" id="chk-g2" onchange="app.toggle('g2')" class="mt-1 w-5 h-5 rounded border-stone-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer">
+                        <div class="w-full">
+                            <h3 class="text-lg font-bold text-stone-800">Configurar identidad local</h3>
+                            <p class="text-stone-600 text-sm mt-1 mb-6">Ejecute estos comandos en la terminal (Git Bash o CMD) <strong>solo en la primera ocasión</strong> para registrar sus aportes:</p>
+                            
+                            <div class="space-y-4">
+                                <div class="code-block">
+                                    <button class="copy-btn" onclick="app.copy('git-config-name', this)">Copiar</button>
+                                    <code id="git-config-name" class="text-emerald-400">git config --global user.name "Su Nombre y Apellido"</code>
+                                </div>
+                                <div class="code-block">
+                                    <button class="copy-btn" onclick="app.copy('git-config-email', this)">Copiar</button>
+                                    <code id="git-config-email" class="text-emerald-400">git config --global user.email "su-correo@ejemplo.com"</code>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="view-workflow" class="max-w-4xl mx-auto hidden-view space-y-8">
+                <div class="mb-4">
+                    <h2 class="text-2xl font-bold text-stone-900">3. Forma de Trabajo (Paso a Paso)</h2>
+                    <p class="text-stone-500 text-sm">Flujo organizado para trabajar en sus proyectos.</p>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div onclick="app.flow('w1')" id="flow-w1" class="step-node active-flow bg-white border-2 p-4 rounded-xl text-center">
+                        <span class="text-xl block mb-1">☁️</span>
+                        <span class="text-[11px] font-black text-stone-800 uppercase tracking-tighter">3.1. Obtener</span>
+                    </div>
+                    <div onclick="app.flow('w2')" id="flow-w2" class="step-node border-2 border-stone-200 bg-white p-4 rounded-xl text-center">
+                        <span class="text-xl block mb-1">💻</span>
+                        <span class="text-[11px] font-black text-stone-800 uppercase tracking-tighter">3.2. Desarrollo</span>
+                    </div>
+                    <div onclick="app.flow('w3')" id="flow-w3" class="step-node border-2 border-stone-200 bg-white p-4 rounded-xl text-center">
+                        <span class="text-xl block mb-1">▶️</span>
+                        <span class="text-[11px] font-black text-stone-800 uppercase tracking-tighter">3.3. Ejecución</span>
+                    </div>
+                    <div onclick="app.flow('w4')" id="flow-w4" class="step-node border-2 border-stone-200 bg-white p-4 rounded-xl text-center">
+                        <span class="text-xl block mb-1">🔄</span>
+                        <span class="text-[11px] font-black text-stone-800 uppercase tracking-tighter">3.4. Sincronizar</span>
+                    </div>
+                </div>
+
+                <div class="relative">
+                    <!-- Contenido 3.1 -->
+                    <div id="cont-w1" class="glass-panel rounded-2xl p-8">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-xl font-bold text-stone-800">3.1. Obtener el Proyecto (Fork y Clone)</h3>
+                            <input type="checkbox" id="chk-w1" onchange="app.toggle('w1')" class="w-6 h-6 rounded border-stone-300 text-emerald-600 cursor-pointer">
+                        </div>
+                        <div class="space-y-6">
+                            <div class="border-l-4 border-stone-200 pl-4">
+                                <p class="text-sm font-bold text-stone-800">Fork</p>
+                                <p class="text-sm text-stone-600 mt-1">Diríjase al repositorio en GitHub y haga clic en <strong>Fork</strong>. Esto creará una copia en su cuenta.</p>
+                            </div>
+                            <div class="border-l-4 border-stone-200 pl-4">
+                                <p class="text-sm font-bold text-stone-800">Clone</p>
+                                <p class="text-sm text-stone-600 mt-1 mb-3">Descargue su copia a la computadora escribiendo en la terminal:</p>
+                                <div class="code-block">
+                                    <button class="copy-btn" onclick="app.copy('code-clone', this)">Copiar</button>
+                                    <code id="code-clone" class="text-emerald-400">git clone https://github.com/su-usuario-github/nombre-del-repositorio.git</code>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Contenido 3.2 -->
+                    <div id="cont-w2" class="glass-panel rounded-2xl p-8 hidden-view">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-xl font-bold text-stone-800">3.2. Desarrollo en el IDE</h3>
+                            <input type="checkbox" id="chk-w2" onchange="app.toggle('w2')" class="w-6 h-6 rounded border-stone-300 text-emerald-600 cursor-pointer">
+                        </div>
+                        <ol class="space-y-4 list-decimal pl-5 text-sm text-stone-600">
+                            <li>Abra su IDE (VS Code, PyCharm, etc.).</li>
+                            <li>Seleccione la opción <strong>"Abrir carpeta"</strong> (Open Folder) y localice la carpeta que acaba de clonar.</li>
+                            <li>Modifique o cree los archivos <code class="bg-stone-100 px-1 rounded text-pink-600">.py</code> necesarios para su labor.</li>
+                        </ol>
+                    </div>
+
+                    <!-- Contenido 3.3 -->
+                    <div id="cont-w3" class="glass-panel rounded-2xl p-8 hidden-view">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-xl font-bold text-stone-800">3.3. Ejecución de Scripts</h3>
+                            <input type="checkbox" id="chk-w3" onchange="app.toggle('w3')" class="w-6 h-6 rounded border-stone-300 text-emerald-600 cursor-pointer">
+                        </div>
+                        <p class="text-sm text-stone-600 mb-6">Para verificar que su código funciona correctamente, utilice la terminal integrada o el CMD:</p>
+                        <ol class="space-y-4 list-decimal pl-5 text-sm text-stone-600">
+                            <li>Navegue hasta la carpeta del proyecto.</li>
+                            <li>Ejecute el archivo con el comando:</li>
+                        </ol>
+                        <div class="code-block mt-4">
+                            <button class="copy-btn" onclick="app.copy('code-python', this)">Copiar</button>
+                            <code id="code-python" class="text-emerald-400">python nombre_archivo.py</code>
+                        </div>
+                    </div>
+
+                    <!-- Contenido 3.4 -->
+                    <div id="cont-w4" class="glass-panel rounded-2xl p-8 hidden-view">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-xl font-bold text-stone-800">3.4. Sincronización de Cambios</h3>
+                            <input type="checkbox" id="chk-w4" onchange="app.toggle('w4')" class="w-6 h-6 rounded border-stone-300 text-emerald-600 cursor-pointer">
+                        </div>
+                        <p class="text-sm text-stone-600 mb-6">Una vez comprobados los cambios localmente, proceda a subirlos a la nube en este orden:</p>
+                        <div class="space-y-4">
+                            <div>
+                                <p class="text-[10px] font-bold text-stone-400 uppercase mb-1">1. Indexar (Add)</p>
+                                <div class="code-block">
+                                    <code class="text-emerald-400">git add .</code>
+                                </div>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-bold text-stone-400 uppercase mb-1">2. Punto de control (Commit)</p>
+                                <div class="code-block">
+                                    <code class="text-emerald-400">git commit -a -m "Descripción breve y clara de la mejora realizada"</code>
+                                </div>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-bold text-stone-400 uppercase mb-1">3. Subir (Push)</p>
+                                <div class="code-block">
+                                    <code class="text-emerald-400">git push</code>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="final-badge" class="hidden-view text-center p-8 bg-emerald-600 rounded-2xl text-white shadow-xl shadow-emerald-100 animate-bounce">
+                    <p class="text-3xl mb-2">🎉</p>
+                    <h4 class="text-xl font-black italic uppercase">¡Entorno configurado!</h4>
+                    <p class="text-xs opacity-90 mt-1">Usted ya tiene todas las herramientas y conoce la forma de trabajo.</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        const app = {
+            view: 'intro',
+            tasks: {
+                t1: false, t2: false, t3: false,
+                g1: false, g2: false,
+                w1: false, w2: false, w3: false, w4: false
+            },
+            chart: null,
+
+            init() {
+                const ctx = document.getElementById('progressChart').getContext('2d');
+                this.chart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Completado', 'Pendiente'],
+                        datasets: [{
+                            data: [0, 100],
+                            backgroundColor: ['#10b981', '#f5f5f4'],
+                            borderWidth: 0,
+                            cutout: '80%'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false }, tooltip: { enabled: false } },
+                        animation: { duration: 1000, easing: 'easeOutQuart' }
+                    }
+                });
+                this.updateProgress();
+            },
+
+            navigate(viewId) {
+                document.querySelectorAll('main > section').forEach(s => s.classList.add('hidden-view'));
+                document.getElementById('view-' + viewId).classList.remove('hidden-view');
+                
+                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                document.getElementById('nav-' + viewId).classList.add('active');
+                
+                document.getElementById('scroll-container').scrollTo({top: 0, behavior: 'smooth'});
+            },
+
+            toggle(id) {
+                this.tasks[id] = !this.tasks[id];
+                const card = document.getElementById('card-' + id);
+                if (card) {
+                    if (this.tasks[id]) {
+                        card.classList.add('border-emerald-200', 'bg-emerald-50/50');
+                    } else {
+                        card.classList.remove('border-emerald-200', 'bg-emerald-50/50');
+                    }
+                }
+                this.updateProgress();
+            },
+
+            flow(id) {
+                document.querySelectorAll('[id^="cont-w"]').forEach(c => c.classList.add('hidden-view'));
+                document.getElementById('cont-' + id).classList.remove('hidden-view');
+                
+                document.querySelectorAll('.step-node').forEach(n => {
+                    n.classList.remove('active-flow', 'border-emerald-600');
+                    n.classList.add('border-stone-200');
+                });
+                document.getElementById('flow-' + id).classList.add('active-flow');
+            },
+
+            updateProgress() {
+                const total = Object.keys(this.tasks).length;
+                const done = Object.values(this.tasks).filter(Boolean).length;
+                const perc = Math.round((done / total) * 100);
+
+                document.getElementById('header-progress-text').innerText = perc + '%';
+                
+                if (this.chart) {
+                    this.chart.data.datasets[0].data = [perc, 100 - perc];
+                    this.chart.update();
+                }
+
+                // Badges
+                const counts = {
+                    tools: [this.tasks.t1, this.tasks.t2, this.tasks.t3].filter(Boolean).length,
+                    github: [this.tasks.g1, this.tasks.g2].filter(Boolean).length,
+                    workflow: [this.tasks.w1, this.tasks.w2, this.tasks.w3, this.tasks.w4].filter(Boolean).length
+                };
+
+                this.updateBadge('tools', counts.tools, 3);
+                this.updateBadge('github', counts.github, 2);
+                this.updateBadge('workflow', counts.workflow, 4);
+
+                if (perc === 100) document.getElementById('final-badge').classList.remove('hidden-view');
+            },
+
+            updateBadge(id, cur, max) {
+                const b = document.getElementById('badge-' + id);
+                b.innerText = `${cur}/${max}`;
+                if (cur === max) {
+                    b.classList.replace('bg-stone-100', 'bg-emerald-500');
+                    b.classList.replace('text-stone-500', 'text-white');
+                } else {
+                    b.classList.replace('bg-emerald-500', 'bg-stone-100');
+                    b.classList.replace('text-white', 'text-stone-500');
+                }
+            },
+
+            copy(id, btn) {
+                const t = document.getElementById(id).innerText;
+                navigator.clipboard.writeText(t).then(() => {
+                    const original = btn.innerText;
+                    btn.innerText = 'Copiado ✓';
+                    btn.classList.add('bg-emerald-600');
+                    setTimeout(() => {
+                        btn.innerText = original;
+                        btn.classList.remove('bg-emerald-600');
+                    }, 2000);
+                });
+            }
+        };
+
+        window.onload = () => app.init();
+    </script>
+</body>
+</html>
